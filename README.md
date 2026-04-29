@@ -180,4 +180,6 @@ If you ever consider running this beyond a lab, at minimum:
 
 ## License
 
-Personal/internal use. Not licensed for redistribution.
+Released under the [MIT License](LICENSE).
+
+Copyright (c) 2026 SanderM
