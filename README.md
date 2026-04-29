@@ -143,14 +143,18 @@ schema, posted to HEC under different sourcetypes so you can split them
 cleanly in SPL.
 
 ### 1. Agent-to-Server network tests
-Latency, jitter, packet loss, path-trace summary. 8 fixed test definitions
-(WAN, MPLS, SD-WAN, subsea cable, Internet, cloud) across 8 fixed agents
-(Oslo, Stavanger, Bergen, London, Frankfurt, Houston, Singapore, Rio).
+Latency, jitter, packet loss, path-trace summary. 12 fixed test definitions
+covering enterprise WAN/MPLS/SD-WAN, subsea cable, Internet breakout, and a
+broad slice of public cloud (AWS `eu-west-1` and `us-east-1`, Azure North
+Europe and East US, GCP `europe-north1`, Cloudflare anycast edge). All run
+across 8 fixed agents (Oslo, Stavanger, Bergen, London, Frankfurt, Houston,
+Singapore, Rio).
 
 ### 2. HTTP Server tests
 Response time (with DNS/connect/SSL/wait/transfer breakdown), status code,
-availability percent. 6 fixed test definitions covering common enterprise
-SaaS (SAP, ServiceNow, O365, Teams, intranet, SCADA).
+availability percent. 9 fixed test definitions covering enterprise SaaS
+(SAP, ServiceNow, O365, Teams), intranet/SCADA, and public-cloud delivery
+(S3 object, Azure Front Door CDN, GCP Cloud Run API).
 
 ### 3. Alert notifications
 Threshold breaches tied to 6 alert rules (latency, loss, HTTP 5xx, slow

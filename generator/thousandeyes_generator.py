@@ -54,6 +54,10 @@ NETWORK_TESTS = [
     {"testId": "50006", "testName": "Subsea Cable - Stavanger to UK", "target": "10.60.1.1", "protocol": "ICMP"},
     {"testId": "50007", "testName": "Cloud - Azure North Europe", "target": "52.138.224.1", "protocol": "TCP"},
     {"testId": "50008", "testName": "Cloud - AWS eu-west-1", "target": "54.72.0.1", "protocol": "TCP"},
+    {"testId": "50009", "testName": "Cloud - AWS us-east-1", "target": "3.5.140.1", "protocol": "TCP"},
+    {"testId": "50010", "testName": "Cloud - Azure East US", "target": "20.42.0.1", "protocol": "TCP"},
+    {"testId": "50011", "testName": "Cloud - GCP europe-north1", "target": "35.228.0.1", "protocol": "TCP"},
+    {"testId": "50012", "testName": "Edge - Cloudflare Anycast", "target": "1.1.1.1", "protocol": "ICMP"},
 ]
 
 HTTP_TESTS = [
@@ -63,6 +67,9 @@ HTTP_TESTS = [
     {"testId": "60004", "testName": "Teams Meeting Join", "url": "https://teams.microsoft.com/v2", "targetResponseTime": 2000},
     {"testId": "60005", "testName": "Intranet Portal", "url": "https://intranet.corp.local", "targetResponseTime": 1000},
     {"testId": "60006", "testName": "SCADA Gateway", "url": "https://scada-gw.ops.corp:8443/health", "targetResponseTime": 500},
+    {"testId": "60007", "testName": "S3 - Public Object", "url": "https://s3.eu-west-1.amazonaws.com/health-bucket/check.txt", "targetResponseTime": 1500},
+    {"testId": "60008", "testName": "Azure Front Door CDN", "url": "https://corp-app.azurefd.net/health", "targetResponseTime": 800},
+    {"testId": "60009", "testName": "GCP Cloud Run API", "url": "https://backend-svc-ew.a.run.app/health", "targetResponseTime": 1200},
 ]
 
 ALERT_RULES = [
