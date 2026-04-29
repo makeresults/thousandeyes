@@ -36,6 +36,31 @@ Tested on macOS (Docker Desktop) and Linux.
 
 ---
 
+## Quick install (no clone needed)
+
+The installer is fully self-contained — it embeds the Python generator and
+Dockerfile, so you only need the one bash script.
+
+```bash
+curl -fsSL -o thousandeyes-gen-installer.sh \
+  https://raw.githubusercontent.com/makeresults/thousandeyes/main/thousandeyes-gen-installer.sh
+chmod +x thousandeyes-gen-installer.sh
+./thousandeyes-gen-installer.sh
+```
+
+> Read the script before running it. Avoid `curl … | bash`-style one-liners —
+> they hide what's about to execute on your machine.
+
+If you'd rather inspect the full source first:
+
+```bash
+git clone https://github.com/makeresults/thousandeyes.git
+cd thousandeyes
+./thousandeyes-gen-installer.sh
+```
+
+---
+
 ## Quick start
 
 ```bash
