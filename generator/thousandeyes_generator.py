@@ -235,12 +235,32 @@ DNS_TESTS = [
 ]
 
 VOICE_TESTS = [
+    # RTP (voice quality) — agent-to-agent calls. The TA's Voice dashboard
+    # groups these by target.agent.name, so emit_metric_voice picks a target.
     {"testId": "65001", "testName": "Webex Calling - EU",
      "testType": "rtp", "target": "rtp-eu.webex.com", "port": 5060,
      "transport": "udp", "domain": "cea"},
     {"testId": "65002", "testName": "Teams Voice Edge",
      "testType": "rtp", "target": "voice.teams.microsoft.com", "port": 5060,
      "transport": "udp", "domain": "cea"},
+    # SIP (signaling) tests — separate test type from RTP.
+    {"testId": "65101", "testName": "Webex SIP Trunk - EU",
+     "testType": "sip", "target": "sip.webex.com", "port": 5061,
+     "transport": "tcp", "domain": "cea"},
+    {"testId": "65102", "testName": "Teams Direct Routing SBC",
+     "testType": "sip", "target": "sbc.teams.corp", "port": 5061,
+     "transport": "tcp", "domain": "cea"},
+]
+
+FTP_TESTS = [
+    {"testId": "67001", "testName": "Vendor Drop FTP",
+     "testType": "ftp-server", "target": "ftp.vendor.corp",
+     "url": "ftp://ftp.vendor.corp/inbound/",
+     "port": 21, "transport": "tcp", "domain": "cea"},
+    {"testId": "67002", "testName": "EDI Partner FTP",
+     "testType": "ftp-server", "target": "edi-partner.corp",
+     "url": "ftp://edi-partner.corp/", "port": 21,
+     "transport": "tcp", "domain": "cea"},
 ]
 
 BGP_MONITORS = [
@@ -328,6 +348,15 @@ for _t in VOICE_TESTS:
         "jitter": random.uniform(1, 10),
         "loss": 0.0,
         "mos": random.uniform(4.1, 4.5),
+        "sip_total": random.uniform(0.4, 1.5),  # seconds
+        "sip_duration": random.uniform(0.3, 1.2),
+        "sip_avail": random.uniform(98, 100),
+    }
+for _t in FTP_TESTS:
+    BASELINES[_t["testId"]] = {
+        "duration": random.uniform(0.5, 4.0),  # seconds
+        "throughput": random.uniform(50_000, 5_000_000),  # bytes/s
+        "avail": random.uniform(98, 100),
     }
 for _t in BGP_PREFIXES:
     BASELINES[_t["testId"]] = {
@@ -577,9 +606,15 @@ def emit_metric_dns(ts: datetime) -> dict:
     return _envelope(ST_METRIC, payload, ts=ts)
 
 
-def emit_metric_voice(ts: datetime) -> dict:
-    test = random.choice(VOICE_TESTS)
-    agent = random.choice([a for a in AGENTS if a["agentType"] != "endpoint"])
+def emit_metric_rtp(ts: datetime) -> dict:
+    """RTP voice quality — agent-to-agent. The TA's Voice dashboard
+    groups RTP panels by target.agent.name, so we must include both
+    source and target agent attributes."""
+    test = random.choice([t for t in VOICE_TESTS if t["testType"] == "rtp"])
+    candidates = [a for a in AGENTS if a["agentType"] != "endpoint"]
+    agent = random.choice(candidates)
+    target_agent = random.choice([a for a in candidates
+                                  if a["agentId"] != agent["agentId"]])
     bl = BASELINES[test["testId"]]
     deg = maybe_degrade()
     mos = jittered(bl["mos"], pct=0.05)
@@ -588,14 +623,71 @@ def emit_metric_voice(ts: datetime) -> dict:
     elif deg == "major":
         mos -= random.uniform(1.0, 2.0)
     mos = max(1.0, min(5.0, mos))
-    duration = jittered(60.0)
+    duration_sec = jittered(60.0) / 1000.0
     payload = {
-        **base_test_attrs(test, agent),
+        **base_test_attrs(test, agent, target_agent),
         "server.address": test["target"],
         "server.port": test.get("port", 5060),
         "network.transport": test.get("transport", "udp"),
         "metric_name:rtp.client.request.mos": round(mos, 2),
-        "metric_name:rtp.client.request.duration": round(duration / 1000.0, 4),
+        "metric_name:rtp.client.request.duration": round(duration_sec, 4),
+    }
+    return _envelope(ST_METRIC, payload, ts=ts)
+
+
+def emit_metric_sip(ts: datetime) -> dict:
+    test = random.choice([t for t in VOICE_TESTS if t["testType"] == "sip"])
+    agent = random.choice([a for a in AGENTS if a["agentType"] != "endpoint"])
+    bl = BASELINES[test["testId"]]
+    deg = maybe_degrade()
+    total = jittered(bl["sip_total"])
+    duration = jittered(bl["sip_duration"])
+    avail = jittered(bl["sip_avail"], pct=0.02)
+    if deg == "minor":
+        total *= random.uniform(1.5, 2.5)
+        duration *= random.uniform(1.5, 2.5)
+        avail = random.uniform(80, 95)
+    elif deg == "major":
+        total *= random.uniform(3.0, 6.0)
+        duration *= random.uniform(3.0, 6.0)
+        avail = random.uniform(20, 70)
+    payload = {
+        **base_test_attrs(test, agent),
+        "server.address": test["target"],
+        "server.port": test.get("port", 5061),
+        "network.transport": test.get("transport", "tcp"),
+        "metric_name:sip.client.request.total_time": round(total, 3),
+        "metric_name:sip.client.request.duration": round(duration, 3),
+        "metric_name:sip.server.request.availability": round(min(100.0, avail), 2),
+    }
+    return _envelope(ST_METRIC, payload, ts=ts)
+
+
+def emit_metric_ftp(ts: datetime) -> dict:
+    test = random.choice(FTP_TESTS)
+    agent = random.choice([a for a in AGENTS if a["agentType"] != "endpoint"])
+    bl = BASELINES[test["testId"]]
+    deg = maybe_degrade()
+    duration = jittered(bl["duration"])
+    throughput = jittered(bl["throughput"])
+    avail = jittered(bl["avail"], pct=0.02)
+    if deg == "minor":
+        duration *= random.uniform(1.5, 3.0)
+        throughput *= random.uniform(0.4, 0.7)
+        avail = random.uniform(80, 95)
+    elif deg == "major":
+        duration *= random.uniform(4.0, 8.0)
+        throughput *= random.uniform(0.05, 0.3)
+        avail = random.uniform(20, 60)
+    payload = {
+        **base_test_attrs(test, agent),
+        "server.address": test["target"],
+        "server.port": test.get("port", 21),
+        "network.transport": test.get("transport", "tcp"),
+        "url.full": test.get("url", ""),
+        "metric_name:ftp.client.request.duration": round(duration, 3),
+        "metric_name:ftp.server.throughput": round(throughput, 1),
+        "metric_name:ftp.server.request.availability": round(min(100.0, avail), 2),
     }
     return _envelope(ST_METRIC, payload, ts=ts)
 
@@ -822,13 +914,15 @@ def emit_alert(ts: datetime) -> dict:
 # Stream registry
 # ---------------------------------------------------------------------------
 METRIC_EMITTERS = [
-    (emit_metric_network, 0.30),
-    (emit_metric_http, 0.22),
-    (emit_metric_pageload, 0.12),
-    (emit_metric_transaction, 0.08),
-    (emit_metric_api, 0.10),
+    (emit_metric_network, 0.26),
+    (emit_metric_http, 0.20),
+    (emit_metric_pageload, 0.10),
+    (emit_metric_transaction, 0.06),
+    (emit_metric_api, 0.08),
     (emit_metric_dns, 0.06),
-    (emit_metric_voice, 0.06),
+    (emit_metric_rtp, 0.06),
+    (emit_metric_sip, 0.06),
+    (emit_metric_ftp, 0.06),
     (emit_metric_bgp, 0.06),
 ]
 
