@@ -29,6 +29,9 @@ out/
 thousandeyes-gen/
 generated/
 
+# Reverse-engineered TA inspection (proprietary Cisco code — never push)
+_ta_inspection/
+
 # Editor / OS (also in global, kept here for explicitness)
 .DS_Store
 *.swp
