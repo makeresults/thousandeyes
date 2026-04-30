@@ -497,12 +497,33 @@ FTP_TESTS = [
 ]
 
 BGP_MONITORS = [
-    {"monitorId": "30001", "monitorName": "AT&T (US)",
-     "location": "Dallas, TX", "asn": "AS7018"},
-    {"monitorId": "30002", "monitorName": "GTT (EU)",
-     "location": "Frankfurt, DE", "asn": "AS3257"},
-    {"monitorId": "30003", "monitorName": "NTT (APAC)",
-     "location": "Tokyo, JP", "asn": "AS2914"},
+    # NB: TA's Network dashboard renders BGP reachability on a choropleth
+    # via `lookup geo_attr_countries iso2`. So `monitor.location` must be
+    # an ISO 3166-1 alpha-2 country code (e.g. "US", "NO"), NOT a city.
+    {"monitorId": "30001", "monitorName": "AT&T - Dallas",
+     "location": "US", "asn": "AS7018"},
+    {"monitorId": "30002", "monitorName": "Verizon - New York",
+     "location": "US", "asn": "AS701"},
+    {"monitorId": "30003", "monitorName": "GTT - Frankfurt",
+     "location": "DE", "asn": "AS3257"},
+    {"monitorId": "30004", "monitorName": "Telia - Stockholm",
+     "location": "SE", "asn": "AS1299"},
+    {"monitorId": "30005", "monitorName": "Telenor - Oslo",
+     "location": "NO", "asn": "AS2119"},
+    {"monitorId": "30006", "monitorName": "BT - London",
+     "location": "GB", "asn": "AS2856"},
+    {"monitorId": "30007", "monitorName": "NTT - Tokyo",
+     "location": "JP", "asn": "AS2914"},
+    {"monitorId": "30008", "monitorName": "Singtel - Singapore",
+     "location": "SG", "asn": "AS7473"},
+    {"monitorId": "30009", "monitorName": "Embratel - Sao Paulo",
+     "location": "BR", "asn": "AS4230"},
+    {"monitorId": "30010", "monitorName": "Telstra - Sydney",
+     "location": "AU", "asn": "AS1221"},
+    {"monitorId": "30011", "monitorName": "Bell - Toronto",
+     "location": "CA", "asn": "AS577"},
+    {"monitorId": "30012", "monitorName": "Comcast - Mumbai",
+     "location": "IN", "asn": "AS9498"},
 ]
 
 BGP_PREFIXES = [
