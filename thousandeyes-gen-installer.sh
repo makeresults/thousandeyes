@@ -423,13 +423,24 @@ PAGELOAD_TESTS = [
      "testType": "page-load", "url": "https://corp.lightning.force.com",
      "target": "corp.lightning.force.com", "port": 443,
      "targetResponseTime": 4000, "domain": "cea"},
+    {"testId": "61003", "testName": "Workday HCM",
+     "testType": "page-load", "url": "https://corp.workday.com/home",
+     "target": "corp.workday.com", "port": 443,
+     "targetResponseTime": 3500, "domain": "cea"},
 ]
 
 TRANSACTION_TESTS = [
+    # NB: TA's eventtypes.conf uses "web-transaction" (singular) while
+    # constants.py uses "web-transactions" (plural). Application dashboard
+    # filters with the singular form, so we emit that.
     {"testId": "62001", "testName": "SAP Login Flow",
-     "testType": "web-transactions", "url": "https://sap.internal.corp/portal",
+     "testType": "web-transaction", "url": "https://sap.internal.corp/portal",
      "target": "sap.internal.corp", "port": 443,
      "targetResponseTime": 6000, "domain": "cea"},
+    {"testId": "62002", "testName": "ServiceNow Ticket Flow",
+     "testType": "web-transaction", "url": "https://corp.service-now.com/login",
+     "target": "corp.service-now.com", "port": 443,
+     "targetResponseTime": 5000, "domain": "cea"},
 ]
 
 API_TESTS = [
@@ -437,6 +448,14 @@ API_TESTS = [
      "testType": "api", "url": "https://api.payments.corp/v1/health",
      "target": "api.payments.corp", "port": 443,
      "targetResponseTime": 800, "domain": "cea"},
+    {"testId": "63002", "testName": "Identity API",
+     "testType": "api", "url": "https://api.identity.corp/v2/whoami",
+     "target": "api.identity.corp", "port": 443,
+     "targetResponseTime": 600, "domain": "cea"},
+    {"testId": "63003", "testName": "Inventory API",
+     "testType": "api", "url": "https://api.inventory.corp/v1/stock",
+     "target": "api.inventory.corp", "port": 443,
+     "targetResponseTime": 1000, "domain": "cea"},
 ]
 
 DNS_TESTS = [
@@ -1036,14 +1055,14 @@ def emit_alert(ts: datetime) -> dict:
 # Stream registry
 # ---------------------------------------------------------------------------
 METRIC_EMITTERS = [
-    (emit_metric_network, 0.45),
-    (emit_metric_http, 0.30),
-    (emit_metric_pageload, 0.04),
-    (emit_metric_transaction, 0.02),
-    (emit_metric_api, 0.03),
+    (emit_metric_network, 0.30),
+    (emit_metric_http, 0.22),
+    (emit_metric_pageload, 0.12),
+    (emit_metric_transaction, 0.08),
+    (emit_metric_api, 0.10),
     (emit_metric_dns, 0.06),
-    (emit_metric_voice, 0.05),
-    (emit_metric_bgp, 0.05),
+    (emit_metric_voice, 0.06),
+    (emit_metric_bgp, 0.06),
 ]
 
 
